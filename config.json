@@ -11,5 +11,5 @@
   "pad_x_after": 64,
   "pad_y_before": 64,
   "pad_y_after": 64,
-  "model_path": "/opt/ml/model/nnUNet_results/Dataset601_Full_128_64/nnUNetTrainer_ULS_500_QuarterLR__nnUNetPlans_shallow__3d_fullres_resenc"
+  "model_path": "/opt/ml/model/nnUNet_results/Dataset400_FSUP_ULS\nUNetTrainer_ULS_300_StrongAug_aksha__nnUNetPlans__3d_fullres"
 }
