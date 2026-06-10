@@ -15,6 +15,7 @@ RUN apt-get update && \
   python3.9 \
   python3.9-dev \
   python3-pip \
+  python3-gdcm \
   nano \
   && \
   apt-get clean autoclean && \
