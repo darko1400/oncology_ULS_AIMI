@@ -12,7 +12,7 @@ RUN apt-get update && \
   wget \
   unzip \
   libopenblas-dev \
-  python3.9 \
+  python3.10 \
   python3.9-dev \
   python3-pip \
   python3-gdcm \
