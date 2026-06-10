@@ -2,48 +2,49 @@ FROM nvcr.io/nvidia/cuda:12.2.0-runtime-ubuntu22.04 AS base
 
 ARG LOCAL_BUILD="false"
 
-RUN rm /etc/apt/sources.list.d/cuda.list
-
+# Ubuntu 22.04 doesn't need the cuda.list removal or the deadsnakes PPA for Python 3.10
 RUN apt-get update && \
-  apt-get install -y software-properties-common && \
-  add-apt-repository ppa:deadsnakes/ppa && \
-  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+  DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   git \
   wget \
   unzip \
   libopenblas-dev \
   python3.10 \
-  python3.9-dev \
+  python3.10-dev \
   python3-pip \
   python3-gdcm \
+  libgdcm-dev \
   nano \
+  cmake \
+  g++ \
   && \
   apt-get clean autoclean && \
   apt-get autoremove -y && \
   rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip
-RUN python3.9 -m pip install --no-cache-dir --upgrade pip
-COPY requirements.txt /tmp/requirements.txt
-RUN python3.9 -m pip install --no-cache-dir -r /tmp/requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
+# Upgrade pip using Python 3.10
+RUN python3.10 -m pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# Configure Git, clone the repository without checking out, then checkout the specific commit
+# Install requirements
+COPY requirements.txt /tmp/requirements.txt
+RUN python3.10 -m pip install --no-cache-dir -r /tmp/requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
+
+# Configure Git, clone nnUNet
 RUN git config --global advice.detachedHead false && \
     git clone --no-checkout https://github.com/MIC-DKFZ/nnUNet.git /opt/algorithm/nnunet/ && \
     cd /opt/algorithm/nnunet/ && \
     git checkout v2.5.1
 
-# Install a few dependencies that are not automatically installed
-RUN pip3 install \
+# Install nnUNet and other tools
+RUN python3.10 -m pip install --no-cache-dir \
         -e /opt/algorithm/nnunet \
         graphviz \
         onnx \
         SimpleITK && \
     rm -rf ~/.cache/pip
 
-### USER
+### USER SETUP
 RUN groupadd -r user && useradd -m --no-log-init -r -g user user
-
 RUN chown -R user /opt/algorithm/
 
 RUN mkdir -p /opt/app /input /output /opt/ml/model \
@@ -75,4 +76,5 @@ ENV nnUNet_raw="/opt/algorithm/nnunet/nnUNet_raw" \
     nnUNet_preprocessed="/opt/algorithm/nnunet/nnUNet_preprocessed" \
     nnUNet_results="/opt/algorithm/nnunet/nnUNet_results"
 
-ENTRYPOINT [ "python3.9", "-m", "process" ]
+# Ensure we use python3.10 to run the process
+ENTRYPOINT [ "python3.10", "process.py" ]
