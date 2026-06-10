@@ -23,7 +23,7 @@ RUN apt-get update && \
   rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip using Python 3.10
-RUN python3.10 -m pip install --no-cache-dir --upgrade pip setuptools wheel
+RUN python3.10 -m pip install --no-cache-dir --upgrade pip setuptools wheel numpy
 
 # Install requirements
 COPY requirements.txt /tmp/requirements.txt
